@@ -28,11 +28,20 @@ class Encoder {
 public:
 	int_fast8_t update(
 		const uint_fast8_t phase_0,
-		const uint_fast8_t phase_1
+		const uint_fast8_t phase_1,
+		const uint64_t update_phase,
+		const uint_fast8_t changed_switches
 	);
 
 private:
 	uint_fast8_t state { 0 };
+
+	uint32_t neg_pos_delta { 0 };
+	uint32_t pos_neg_delta { 0 };
+	uint32_t phase0_neg_pos_time { 0 };
+	uint32_t phase1_neg_pos_time { 0 };
+	uint32_t phase0_pos_neg_time { 0 };
+	uint32_t phase1_pos_neg_time { 0 };
 };
 
 #endif/*__ENCODER_H__*/

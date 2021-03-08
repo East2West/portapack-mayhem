@@ -50,6 +50,8 @@ static volatile uint32_t encoder_position { 0 };
 
 static volatile uint32_t touch_phase { 0 };
 
+static volatile uint64_t update_phase { 0 };
+
 /* TODO: Change how touch scanning works. It produces a decent amount of noise
  * when changing potential on the resistive touch pad. Among other things, I
  * see blips of noise when sampling the MAX2837 RSSI signal. And when the
@@ -124,20 +126,27 @@ static bool touch_update() {
 
 static uint8_t switches_raw = 0;
 
-static bool switches_update(const uint8_t raw) {
+static uint8_t switches_update(const uint8_t raw) {
 	// TODO: Only fire event on press, not release?
-	bool switch_changed = false;
+	uint8_t switch_changed = 0x0;
 	for(size_t i=0; i<switch_debounce.size(); i++) {
-		switch_changed |= switch_debounce[i].feed((raw >> i) & 1);
+		//if(i > 4){
+		//	switch_changed |= (switch_debounce[i].set_state((raw >> i) & 1) << i);
+		//}
+		//else {
+			switch_changed |= ((switch_debounce[i].feed((raw >> i) & 1)) << i);
+		//}		
 	}
 
 	return switch_changed;
 }
 
-static bool encoder_read() {
+static bool encoder_read(uint8_t changed_switches) {
 	const auto delta = encoder.update(
 		switch_debounce[5].state(),
-		switch_debounce[6].state()
+		switch_debounce[6].state(),		
+		update_phase,
+		changed_switches
 	);
 
 	if( delta != 0 ) {
@@ -152,9 +161,11 @@ void timer0_callback(GPTDriver* const) {
 	eventmask_t event_mask = 0;
 	if( touch_update() ) event_mask |= EVT_MASK_TOUCH;
 	switches_raw = portapack::io.io_update(touch_pins_configs[touch_phase]);
-	if( switches_update(switches_raw) ) {
+
+	uint8_t changed_switches = switches_update(switches_raw);
+	if( changed_switches > 0) {
 		event_mask |= EVT_MASK_SWITCHES;
-		if( encoder_read() ) event_mask |= EVT_MASK_ENCODER;
+		if( encoder_read(changed_switches) ) event_mask |= EVT_MASK_ENCODER;
 	}
 
 	/* Signal event loop */
@@ -163,6 +174,8 @@ void timer0_callback(GPTDriver* const) {
 		chEvtSignalI(thread_controls_event, event_mask);
 		chSysUnlockFromIsr();
 	}
+
+	update_phase++;
 }
 
 /* TODO: Refactor some/all of this to appropriate shared headers? */

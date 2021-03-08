@@ -32,6 +32,13 @@ public:
 		return state_;
 	}
 
+	bool set_state(uint8_t state){
+		bool changed = state_ != state;
+		state_ = state;
+
+		return changed;
+	}
+
 private:
 	uint8_t history_ { 0 };
 	uint8_t state_ { 0 };
