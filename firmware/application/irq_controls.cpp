@@ -130,12 +130,7 @@ static uint8_t switches_update(const uint8_t raw) {
 	// TODO: Only fire event on press, not release?
 	uint8_t switch_changed = 0x0;
 	for(size_t i=0; i<switch_debounce.size(); i++) {
-		//if(i > 4){
-		//	switch_changed |= (switch_debounce[i].set_state((raw >> i) & 1) << i);
-		//}
-		//else {
-			switch_changed |= ((switch_debounce[i].feed((raw >> i) & 1)) << i);
-		//}		
+		switch_changed |= ((switch_debounce[i].feed((raw >> i) & 1)) << i);
 	}
 
 	return switch_changed;
