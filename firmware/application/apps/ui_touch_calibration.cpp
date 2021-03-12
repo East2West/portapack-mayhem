@@ -46,6 +46,7 @@ TouchCalibrationView::TouchCalibrationView(
 		&label_failure,
 		&button_cancel,
 		&button_ok,
+		&txt_debug
 	});
 
 	button_cancel.on_select = [this](Button&){ this->on_cancel(); };
@@ -181,6 +182,11 @@ void TouchCalibrationView::on_frame_sync() {
 	}
 
 	const auto frame = get_touch_frame();
+
+	std::string out = to_string_dec_uint(frame.pressure.xp - frame.pressure.xn) + " " + to_string_dec_uint(frame.pressure.yp - frame.pressure.yn);
+    txt_debug.set(std::string(out));
+
+
 	const auto metrics = touch::calculate_metrics(frame);
 	const auto x = metrics.x * 1024;
 	const auto y = metrics.y * 1024;

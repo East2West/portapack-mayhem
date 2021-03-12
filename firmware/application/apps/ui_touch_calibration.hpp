@@ -25,6 +25,7 @@
 #include "ui_widget.hpp"
 #include "ui_navigation.hpp"
 #include "touch.hpp"
+#include "string_format.hpp"
 
 namespace ui {
 
@@ -115,8 +116,13 @@ private:
 		Color::black()
 	};
 
-	Text label_calibrate {
+	Text txt_debug {
 		{ 16, 5 * 16, 26 * 8, 1 * 16 },
+		"Test"
+    };
+
+	Text label_calibrate {
+		{ 16, 8 * 16, 26 * 8, 1 * 16 },
 		"Touch targets to calibrate"
 	};
 
